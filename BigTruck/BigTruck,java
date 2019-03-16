@@ -1,0 +1,85 @@
+import java.util.*;
+import java.math.*;
+
+public class BigTruck
+{   
+    //n is the number of locations
+    int n;
+    //sum of items up to each location by following the shortest path
+    //shortest path to get to each location
+    //Items at each location 
+    int[] items,shortest_path,STARTING_ITEMS;
+    //Given as a,b,d where a and b are locations, c is the length between
+    int[][] roads; 
+
+    public BigTruck(Scanner input)
+    {
+        n = input.nextInt();
+
+        items = new int[n+1];
+        shortest_path = new int[n+1];
+        STARTING_ITEMS = new int[n+1];
+
+        for(int i = 1; i <= n; i++) {
+            STARTING_ITEMS[i] = items[i] = input.nextInt();
+            shortest_path[i] = n*101;
+        }
+        shortest_path[1] = 0;
+
+        roads = new int[input.nextInt()][3];
+        input.nextLine();
+
+        for(int i = 0; i < roads.length; i++) {
+            roads[i][0] = input.nextInt(); 
+            roads[i][1] = input.nextInt();
+            roads[i][2] = input.nextInt();
+        }
+    }
+
+    public static void main(String[] args)
+    {
+        BigTruck bt = new BigTruck(new Scanner(System.in));
+        bt.update_paths();
+        if(bt.shortest_path[bt.n] == bt.n * 101) {
+            System.out.println("impossible");
+            return;
+        }else System.out.println(bt.shortest_path[bt.n] + " " + bt.items[bt.n]);
+    }
+
+    public void update_paths()
+    {
+        boolean changed;
+        do{
+            changed = false;
+            for(int i = 0; i < roads.length; i++)
+            {
+                int a = roads[i][0];
+                int b = roads[i][1];
+                int c = roads[i][2];
+
+                //shortest_path[a] = min{shortest_path[a], shortest_path[b] + c}
+                if(shortest_path[a] > shortest_path[b] + c){    
+                    shortest_path[a] = shortest_path[b] + c;
+                    //items[a] = Math.max(items[a],items[b] + STARTING_ITEMS[a]);
+                    items[a] = items[b] + STARTING_ITEMS[a];
+                    changed = true;
+                }
+                else if(shortest_path[a] == shortest_path[b] + c){
+                    if (items[a] < items[b] + STARTING_ITEMS[a]) changed = true;
+                    items[a] = Math.max(items[a], items[b] + STARTING_ITEMS[a]);
+                }
+                //shortest_path[b] = min{shortest_path[b], shortest_path[a] + c}
+                else if(shortest_path[b] > shortest_path[a] + c){ 
+                    shortest_path[b] = shortest_path[a] + c;
+                    //items[b] = Math.max(items[b],items[a] + STARTING_ITEMS[b]);
+                    items[b] = items[a] + STARTING_ITEMS[b];
+                    changed = true;
+                }
+                else if(shortest_path[b] == shortest_path[a] + c){
+                    if(items[b] < items[a] + STARTING_ITEMS[b]) changed = true;
+                    items[b] = Math.max(items[b], items[a] + STARTING_ITEMS[b]);
+                }
+            }
+        }while(changed);
+    }
+}
